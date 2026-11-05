@@ -514,10 +514,12 @@ func getPath(filepath string, params *emailParams) (*url.URL, error) {
 
 func encodeRedirectURL(referrerURL string) string {
 	if len(referrerURL) > 0 {
-		if strings.ContainsAny(referrerURL, "&=#") {
-			// if the string contains &, = or # it has not been URL
-			// encoded by the caller, which means it should be URL
-			// encoded by us otherwise, it should be taken as-is
+		if strings.ContainsAny(referrerURL, "&=#+;% ") {
+			// Callers pass the redirect URL already decoded, so any
+			// character that changes meaning when the link's query string
+			// is parsed (&, =, #, + read as a space, ; rejected by the
+			// parser, % starting an escape) must be encoded by us. Other
+			// URLs are taken as-is to keep links readable.
 			referrerURL = url.QueryEscape(referrerURL)
 		}
 	}
